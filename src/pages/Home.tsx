@@ -1,28 +1,37 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { Header } from '../components/Header';
-import { Task, TasksList } from '../components/TasksList';
+import { IEditTask, Task, TasksList } from '../components/TasksList';
 import { TodoInput } from '../components/TodoInput';
+
+
 
 export function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   function handleAddTask(newTaskTitle: string) {
-    
-    const data:Task = {
-    
-      id: new Date().getTime(),
-      done:false,
-      title:newTaskTitle
 
-    };
+    const existsTask = tasks.find(task => task.title === newTaskTitle);
 
-    if(newTaskTitle !== ''){
+    if(!existsTask){
+      
+      const data:Task = {
+    
+        id: new Date().getTime(),
+        done:false,
+        title:newTaskTitle
+  
+      };
+      
       setTasks([...tasks,data]);
+
+    }else{
+
+      Alert.alert('Task já cadastrada!','Você não pode cadastrar uma task com o mesmo nome.')
     }
 
-    
+        
   }
 
   function handleToggleTaskDone(id: number) {
@@ -39,6 +48,7 @@ export function Home() {
   }
 
   function handleRemoveTask(id: number) {
+   
     const tasksClone = [...tasks];
     
 
@@ -54,6 +64,19 @@ export function Home() {
    
   }
 
+  function handleEditTask({id,taskNewTitle}:IEditTask){
+    const tasksClone = [...tasks];
+
+    const findIndexTask = tasks.findIndex(task => task.id === id);
+  
+    if(findIndexTask >= 0) {
+      
+      tasksClone[findIndexTask].title = taskNewTitle;
+      setTasks(tasksClone);
+
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Header tasksCounter={tasks.length} />
@@ -63,7 +86,8 @@ export function Home() {
       <TasksList 
         tasks={tasks} 
         toggleTaskDone={handleToggleTaskDone}
-        removeTask={handleRemoveTask} 
+        removeTask={handleRemoveTask}
+        editTask={handleEditTask}
       />
     </View>
   )
